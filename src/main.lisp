@@ -139,6 +139,14 @@
            :initform nil
            :accessor blocks)))
 
+(defun make-thingy (class)
+  (let ((class-name (gensym)))
+    ;; every new thingy gets its very own class
+    (sb-mop:ensure-class class-name
+                         :direct-superclasses (list class))
+    (make-instance class-name)))
+
+
 (defclass trait () ())
 
 (defun has-trait-p (thingy trait)
@@ -375,7 +383,7 @@
                   (pos (to-pos (random-range (rect-x1 room) (rect-x2 room))
                                (random-range (rect-y1 room) (rect-y2 room)))))
              (when (not (blocked (map-tile-at map pos)))
-               (let ((monster (make-instance monster-type)))
+               (let ((monster (make-thingy monster-type)))
                  (place-at monster map pos))))))
 
 (defun dig-horizontal-tunnel (map x1 x2 y)
@@ -409,7 +417,7 @@
   (labels ((maybe-place-at (pos)
              (when (and (map-tile-at map pos)
                         (= 2 (length (neighbor-tiles map pos))))
-               (place-at (make-instance 'door) map pos))))
+               (place-at (make-thingy 'door) map pos))))
     (loop for room in rooms
           do (progn
                (loop for y from (rect-y1 room) upto (rect-y2 room)
